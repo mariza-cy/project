@@ -1,0 +1,16 @@
+To run
+------
+Remember to exit the container
+git pull
+make build
+make run
+source /opt/ros/humble/setup.bash 
+source ./install/setup.bash 
+export VEHICLE_NAME=duckie05
+export USER_NAME=duckie05
+chmod a+x ./install/blank_package/lib/blank_package/blank_node.py
+ls -al ./install/blank_package/lib/blank_package/
+ros2 run blank_package blank_node.py
+
+To stop wheels:
+ros2 topic pub /duckie05/wheels_cmd duckietown_msgs/msg/WheelsCmdStamped "{vel_left: 0.0, vel_right: 0.0}"

@@ -11,9 +11,11 @@ class Blinker(Node):
     def __init__(self):
         super().__init__('blinker')
         self.vehicle_name = os.getenv('VEHICLE_NAME')
+
         self.led_pub = self.create_publisher(LEDPattern, f'/{self.vehicle_name}/led_pattern', 1)
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f'/{self.vehicle_name}/wheels_cmd', 1)
-        self.timer = self.create_timer(1, self.move_forward)
+
+        self.timer = self.create_timer(1, self.change_color)
 
     def change_color(self):
         msg = LEDPattern()
@@ -43,10 +45,17 @@ class Blinker(Node):
         self.get_logger().info("Moving forward")
         self.run_wheels(0.5, 0.5)
 
+    def move_forward(self):
+        self.get_logger().info("Stopping")
+        self.run_wheels(0.0, 0.0)
+
 def main():
     rclpy.init()
     blinker = Blinker()
     rclpy.spin(blinker)
+    blinker.move_forward()
+    sleep(3)
+    blinker.stop()
     rclpy.shutdown()
 
 
