@@ -20,8 +20,9 @@ class Blinker(Node):
         pattern2 = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)
         pattern3 = ColorRGBA(r=0.0, g=0.0, b=1.0, a=1.0)
         pattern4 = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)
+        pattern5 = ColorRGBA(r=1.0, g=1.0, b=0.0, a=1.0)
 
-        msg.rgb_vals = [pattern1] + [pattern2] + [pattern3] + [pattern4] + [pattern4]
+        msg.rgb_vals = [pattern1] + [pattern2] + [pattern3] + [pattern4] + [pattern5]
         self.publisher.publish(msg)
 
 def main():
