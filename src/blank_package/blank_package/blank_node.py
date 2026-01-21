@@ -42,11 +42,11 @@ class Blinker(Node):
         pattern4 = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)  # 4 -> White
         pattern5 = ColorRGBA(r=1.0, g=1.0, b=0.0, a=1.0)  # 5 -> Yellow
 
-        if counter2%2 == 0: 
+        if self.counter2%2 == 0: 
             msg.rgb_vals = [pattern] * 5
         else:
             msg.rgb_vals = [pattern1] + [pattern2] + [pattern3] + [pattern4] + [pattern5]
-        counter2 += 1
+        self.counter2 += 1
         self.led_pub.publish(msg)
 
     def run_wheels(self, vel_left, vel_right):
