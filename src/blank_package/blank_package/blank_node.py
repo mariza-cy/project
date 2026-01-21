@@ -38,7 +38,7 @@ class Blinker(Node):
         msg.rgb_vals = [pattern1] + [pattern2] + [pattern3] + [pattern4] + [pattern5]
         self.led_pub.publish(msg)
     
-    def change_color_white(self):
+    def change_color_blink(self):
         msg = LEDPattern()
 
         pattern = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)
