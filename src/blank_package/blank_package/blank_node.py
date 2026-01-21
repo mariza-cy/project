@@ -22,7 +22,7 @@ class Blinker(Node):
         # self.change_color_white()
         self.timer = self.create_timer(1, self.change_color)
         self.timer = self.create_timer(1, self.move_forward)
-        self.timer = self.create_timer(1, self.change_color_blink)
+        # self.timer = self.create_timer(1, self.change_color_blink)
 
     def change_color(self):
         msg = LEDPattern()
