@@ -16,11 +16,13 @@ class Blinker(Node):
         self.led_pub = self.create_publisher(LEDPattern, f'/{self.vehicle_name}/led_pattern', 1)
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f'/{self.vehicle_name}/wheels_cmd', 1)
 
-        self.timer = self.create_timer(1, self.change_color_white)
+        self.change_color_white()
         self.move_forward()
         time.sleep(3)
         self.stop()
-        self.timer = self.create_timer(1, self.change_color)
+        self.timer = self.create_timer(2, self.change_color)
+        time.sleep(1)
+        self.timer = self.create_timer(2, self.change_color_white)
 
     def change_color(self):
         msg = LEDPattern()
