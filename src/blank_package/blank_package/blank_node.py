@@ -16,8 +16,8 @@ class Blinker(Node):
 
     def change_color(self):
         msg = LEDPattern()
-        if counter%2==0 pattern = ColorRGBA(r=0.0, g=0.0, b=1.0, a=1.0)
-        else pattern = ColorRGBA(r=1.0, g=1.0, b=0.0, a=1.0)
+        if counter%2==0: pattern = ColorRGBA(r=0.0, g=0.0, b=1.0, a=1.0)
+        else: pattern = ColorRGBA(r=1.0, g=1.0, b=0.0, a=1.0)
         msg.rgb_vals = [pattern] * 5
         self.publisher.publish(msg)
 
