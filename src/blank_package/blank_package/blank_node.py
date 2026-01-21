@@ -9,7 +9,7 @@ from std_msgs.msg import ColorRGBA
 class Blinker(Node):
     def __init__(self):
         super().__init__('blinker')
-        self.vehicle_name = os.getenv('VEHICLE NAME')
+        self.vehicle_name = os.getenv('VEHICLE_NAME')
         self.publisher = self.create_publisher(LEDPattern, f'/{self.vehicle_name}/led_pattern', 1)
         self.timer = self.create_timer(1, self.change_color)
 
