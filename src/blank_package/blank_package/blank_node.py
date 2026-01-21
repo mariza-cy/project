@@ -16,7 +16,7 @@ class Blinker(Node):
         self.led_pub = self.create_publisher(LEDPattern, f'/{self.vehicle_name}/led_pattern', 1)
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f'/{self.vehicle_name}/wheels_cmd', 1)
 
-        self.timer = self.create_timer(1, self.change_color)
+        # self.timer = self.create_timer(1, self.change_color)
         self.move_forward()
         time.sleep(3)
         self.stop()
@@ -49,7 +49,7 @@ class Blinker(Node):
         self.get_logger().info("Moving forward")
         self.run_wheels(0.5, 0.5)
 
-    def move_forward(self):
+    def stop(self):
         self.get_logger().info("Stopping")
         self.run_wheels(0.0, 0.0)
 
