@@ -17,14 +17,12 @@ class Blinker(Node):
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f'/{self.vehicle_name}/wheels_cmd', 1)
 
         self.counter1 = 0
+        self.counter2 = 0
 
         # self.change_color_white()
         self.timer = self.create_timer(1, self.change_color)
         self.timer = self.create_timer(1, self.move_forward)
-        # self.stop()
-        # self.timer = self.create_timer(2, self.change_color)
-        # time.sleep(1)
-        # self.timer = self.create_timer(2, self.change_color_white)
+        self.timer = self.create_timer(1, self.change_color_white)
 
     def change_color(self):
         msg = LEDPattern()
@@ -42,8 +40,17 @@ class Blinker(Node):
         msg = LEDPattern()
 
         pattern = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)
+        pattern1 = ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0)  # 1 -> Red
+        pattern2 = ColorRGBA(r=0.0, g=1.0, b=0.0, a=1.0)  # 2 -> Green
+        pattern3 = ColorRGBA(r=0.0, g=0.0, b=1.0, a=1.0)  # 3 -> Blue
+        pattern4 = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)  # 4 -> White
+        pattern5 = ColorRGBA(r=1.0, g=1.0, b=0.0, a=1.0)  # 5 -> Yellow
 
-        msg.rgb_vals = [pattern] * 5
+        if counter%2 == 0: 
+            msg.rgb_vals = [pattern] * 5
+        else:
+            msg.rgb_vals = [pattern1] + [pattern2] + [pattern3] + [pattern4] + [pattern5]
+        counter += 1
         self.led_pub.publish(msg)
 
     def run_wheels(self, vel_left, vel_right):
