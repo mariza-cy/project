@@ -85,6 +85,9 @@ class Blinker(Node):
             self.turn_left()
         else:
             self.stop()
+        
+        if counter<8:
+            counter+=1
 
     # def save_image(self, msg):
     #     if self.counter % 30 == 0:
