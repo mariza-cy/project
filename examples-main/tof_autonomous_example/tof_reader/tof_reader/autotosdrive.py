@@ -1,26 +1,24 @@
 #!/usr/bin/env python3
 import math
 import os
+from platform import node
+
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
-from duckietown.dtros import DTROS, NodeType
-from duckietown_msgs.msg import WheelEncoderStamped, WheelsCmdStamped
 from sensor_msgs.msg import Range
+from duckietown_msgs.msg import WheelsCmdStamped, WheelEncoderStamped
+
 
 #!/usr/bin/env python3
 
 
 
-class DriveToTarget (DTROS):
+class DriveToTarget (Node):
+    def __init__(self):
+        super().__init__('encoder_node')
+        self.get_logger().info('Node started')
 
-
-    def __init__(self, node_name):
-
-        super(DriveToTarget, self).__init__(
-            node_name=node_name,
-            node_type=NodeType.PERCEPTION  #maybe "NodeType.CONTROL" if Errno 2848347384893 appears
-        )
         self.vehicle = os.environ["VEHICLE_NAME"]
 
         self.odom_ready = False
@@ -122,7 +120,7 @@ class DriveToTarget (DTROS):
         return forward - turn, forward + turn
 
 
-    def run(self):
+    def run(self, args=None):
         rate = rclpy.Rate(10)
 
         while not rclpy.is_shutdown():
@@ -152,9 +150,9 @@ class DriveToTarget (DTROS):
 
 if __name__ == '__main__':
    print("HOPES AND PRAYERS")               #HOPES AND PRAYERS
-   node = DriveToTarget(node_name='wheel_encoder_reader_node')
+   node = DriveToTarget()
    node.run()
    rclpy.spin()
 
-   #CRASH OUT COUNT: 4
+   #CRASH OUT COUNT: 5
 
