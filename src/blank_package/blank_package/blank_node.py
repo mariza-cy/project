@@ -62,6 +62,7 @@ class Blinker(Node):
             self.get_logger().info('Image')
             with open(self.output_dir + str(self.counter) + '.jpg', 'wb') as f:
                 f.write(msg.data)
+            self.obstacle = False
 
     def run_wheels(self, vel_left, vel_right):
         wheel_msg = WheelsCmdStamped()
@@ -100,8 +101,6 @@ class Blinker(Node):
 
         if self.counter%2==0:
             self.obstacle = True
-        else:
-            self.obstacle = False
 
         self.counter += 1
 
