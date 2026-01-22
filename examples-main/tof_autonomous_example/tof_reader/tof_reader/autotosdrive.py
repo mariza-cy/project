@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import math
 import os
-from platform import node
 
 import rclpy
 from rclpy.node import Node
@@ -10,7 +9,6 @@ from sensor_msgs.msg import Range
 from duckietown_msgs.msg import WheelsCmdStamped, WheelEncoderStamped
 
 
-#!/usr/bin/env python3
 
 
 
