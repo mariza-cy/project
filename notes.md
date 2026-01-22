@@ -102,7 +102,6 @@ Libraries:
 ```py
 from duckietown_msgs.msg import WheelsCmdStamped
 from std_msgs.msg import Header
-from rclpy.time import Duration  # ?
 ```
 
 In `__init()__`:

@@ -5,7 +5,6 @@ import time
 from rclpy.node import Node
 from duckietown_msgs.msg import LEDPattern, WheelsCmdStamped
 from std_msgs.msg import ColorRGBA, Header
-# from rclpy.time import Duration
 
 
 class Blinker(Node):
@@ -51,10 +50,10 @@ class Blinker(Node):
     def run_wheels(self, vel_left, vel_right):
         wheel_msg = WheelsCmdStamped()
 
-        header = Header()
-        header.stamp = self.get_clock().now().to_msg()
+        # header = Header()
+        # header.stamp = self.get_clock().now().to_msg()
 
-        wheel_msg.header = header
+        # wheel_msg.header = header
         wheel_msg.vel_left = vel_left
         wheel_msg.vel_right = vel_right
 
