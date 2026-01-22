@@ -20,6 +20,7 @@ class Blinker(Node):
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f'/{self.vehicle_name}/wheels_cmd', 1)
         self.create_subscription(CompressedImage, f'/{self.vehicle_name}/image/compressed', self.save_image, 10)
 
+        self.image_counter = 0
         self.counter = 0
         self.obstacle = False
 
@@ -59,8 +60,9 @@ class Blinker(Node):
 
     def save_image(self, msg):
         if self.obstacle:
-            self.get_logger().info('Image')
-            with open(self.output_dir + str(self.counter) + '.jpg', 'wb') as f:
+            self.get_logger().info(f'Image {self.image_counter}')
+            self.image_counter += 1
+            with open(self.output_dir + str(self.image_counter) + '.jpg', 'wb') as f:
                 f.write(msg.data)
             self.obstacle = False
 
