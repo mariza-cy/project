@@ -151,7 +151,7 @@ class DriveToTarget (Node):
 
 if __name__ == '__main__':
    print("HOPES AND PRAYERS")               #HOPES AND PRAYERS
-   rclpy.init(args=args)
+   rclpy.init()
    node = DriveToTarget()
    rclpy.spin(node)
    node.destroy_node()
