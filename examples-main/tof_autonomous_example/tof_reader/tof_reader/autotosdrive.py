@@ -1,32 +1,31 @@
 #!/usr/bin/env python3
 import math
 import os
-import rospy
-from duckietown.dtros import DTROS, NodeType
-from duckietown_msgs.msg import WheelEncoderStamped
-from duckietown_msgs.msg import WheelEncoderStamped, WheelsCmdStamped
+from platform import node
+
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import String
 from sensor_msgs.msg import Range
+from duckietown_msgs.msg import WheelsCmdStamped, WheelEncoderStamped
+
 
 #!/usr/bin/env python3
 
 
 
-class DriveToTarget (DTROS):
+class DriveToTarget (Node):
+    def __init__(self):
+        super().__init__('encoder_node')
+        self.get_logger().info('Node started')
 
-
-    def __init__(self, node_name):
-
-        super(DriveToTarget, self).__init__(
-            node_name=node_name,
-            node_type=NodeType.PERCEPTION  #maybe "NodeType.CONTROL" if Errno 2848347384893 appears
-        )
         self.vehicle = os.environ["VEHICLE_NAME"]
 
         self.odom_ready = False
 
         self.WHEEL_RADIUS = 0.033  # readings not accurate (radius of wheels)   TO CALIBRATE       DONE
         self.WHEEL_BASE = 0.06  # readings not accurate (dist. between encoders)  TO CALIBRATE     DONE
-        self.TICKS_PER_REV = None
+        self.TICKS_PER_REV = 135
 
 
         self.x = 0.0
@@ -50,17 +49,23 @@ class DriveToTarget (DTROS):
         self.right_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/right_wheel_encoder_node/tick")         #Sub to duckie duckie's right encoder
 
 
-        self.wheel_pub = self.create_publisher(WheelsCmdStamped, f"/{self.vehicle}/wheels_driver_node/wheels_cmd", 10)                                                      #Pub to duckie duckie's motors so he can move
+        self.wheel_pub = self.create_publisher(WheelsCmdStamped, f"/{self.vehicle}/wheels_driver_node/wheels_cmd", self.tick, 10)     #Pub to duckie duckie's motors so he can move
+
+
+        self.timer = self.create_timer(0.1, self.control_loop)
 
 
 
-    def left_t(self, msg):
-        self.left_ticks = msg.data
 
-    def right_t(self, msg):
-        self.right_ticks = msg.data
+    def tick_callback(self, msg):
 
-        self.TICKS_PER_REV = msg.resolution
+        if 'left' in msg.header.frame_id:
+            self.left_ticks = msg.data
+            self.get_logger().info(f'Left ticks: {self.left_ticks}')
+        elif 'right' in msg.header.frame_id:
+            self.right_ticks = msg.data
+            self.get_logger().info(f'Right ticks: {self.right_ticks}')
+
 
 
     def update_odometry(self):
@@ -119,23 +124,22 @@ class DriveToTarget (DTROS):
         return forward - turn, forward + turn
 
 
-    def run(self):
-        rate = rospy.Rate(10)
+    def control_loop(self):
 
-        while not rospy.is_shutdown():
+        if self.left_ticks is None or self.right_ticks is None:
+            return
 
-            if self.prev_left_ticks is None or self.prev_right_ticks is None:
-                self.prev_left_ticks = self.left_ticks
-                self.prev_right_ticks = self.right_ticks
-                self.odom_ready = True                                 #to make sure duckie duckie starts at the right time
-                return
+        if self.prev_left_ticks is None or self.prev_right_ticks is None:
+            self.prev_left_ticks = self.left_ticks
+            self.prev_right_ticks = self.right_ticks
+            self.odom_ready = True                                 #to make sure duckie duckie starts at the right time
+            return
 
             self.update_odometry()
 
 
-            if not self.odom_ready:
-                rate.sleep()
-                continue              #duckie duckie no move, VERY SADDDDD
+        if not self.odom_ready:
+            return                  #duckie duckie no move, VERY SADDDDD
 
             left_t, right_t = self.compute_control()
 
@@ -148,10 +152,12 @@ class DriveToTarget (DTROS):
 
 
 if __name__ == '__main__':
-   print("HOPES AND PRAYERS")                                  #HOPES AND PRAYERS
-   node = DriveToTarget(node_name='wheel_encoder_reader_node')
-   node.run()
-   rospy.spin()
+   print("HOPES AND PRAYERS")               #HOPES AND PRAYERS
+   rclpy.init(args=args)
+   node = DriveToTarget()
+   rclpy.spin(node)
+   node.destroy_node()
+   rclpy.shutdown()
 
-   #CRASH OUT COUNT: 3
+   #CRASH OUT COUNT: 5
 
