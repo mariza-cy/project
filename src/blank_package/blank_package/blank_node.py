@@ -18,9 +18,10 @@ class Blinker(Node):
 
         # self.led_pub = self.create_publisher(LEDPattern, f'/{self.vehicle_name}/led_pattern', 1)
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f'/{self.vehicle_name}/wheels_cmd', 1)
-        # self.create_subscription(CompressedImage, f'/{self.vehicle_name}/image/compressed', self.save_image, 10)
+        self.create_subscription(CompressedImage, f'/{self.vehicle_name}/image/compressed', self.save_image, 10)
 
         self.counter = 0
+        self.obstacle = False
 
         self.timer = self.create_timer(1, self.move)
 
@@ -56,6 +57,12 @@ class Blinker(Node):
     #     self.counter2 += 1
     #     self.led_pub.publish(msg)
 
+    def save_image(self, msg):
+        if self.obstacle:
+            self.get_logger().info('Image')
+            with open(self.output_dir + str(self.counter) + '.jpg', 'wb') as f:
+                f.write(msg.data)
+
     def run_wheels(self, vel_left, vel_right):
         wheel_msg = WheelsCmdStamped()
 
@@ -77,24 +84,24 @@ class Blinker(Node):
         self.run_wheels(0.0, 0.0)
 
     def move(self):
-        if self.counter<=1 or (3<=self.counter and self.counter<=4):
-            self.move_forward()
-        elif self.counter==2:
-            self.turn_right()
-        elif self.counter==5:
-            self.turn_left()
-        else:
-            self.stop()
+        # if self.counter<=1 or (3<=self.counter and self.counter<=4):
+        #     self.move_forward()
+        # elif self.counter==2:
+        #     self.turn_right()
+        # elif self.counter==5:
+        #     self.turn_left()
+        # else:
+        #     self.stop()
         
-        if self.counter<10:
-            self.counter+=1
+        # if self.counter<10:
+        #     self.counter+=1
 
-    # def save_image(self, msg):
-    #     if self.counter % 30 == 0:
-    #         with open(self.output_dir + str(self.counter) + '.jpg', 'wb') as f:
-    #             self.get_logger().info(f'Saving image {self.counter}')
-    #             f.write(msg.data)
-    #     self.counter += 1
+        self.get_logger().info(f'Counter: {self.counter}')
+
+        if self.counter%2==0:
+            obstacle = True
+        else:
+            obstacle = False
 
 
 def main():
