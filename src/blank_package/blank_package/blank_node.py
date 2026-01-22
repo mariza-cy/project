@@ -99,9 +99,9 @@ class Blinker(Node):
         self.get_logger().info(f'Counter: {self.counter}')
 
         if self.counter%2==0:
-            obstacle = True
+            self.obstacle = True
         else:
-            obstacle = False
+            self.obstacle = False
 
         self.counter += 1
 
