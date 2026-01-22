@@ -68,10 +68,10 @@ class Blinker(Node):
         self.run_wheels(0.4, 0.3)
 
     def turn_right(self):
-        self.run_wheels(0.05, -0.1)
+        self.run_wheels(0.05, -0.0.5)
 
     def turn_left(self):
-        self.run_wheels(-0.05, 0.1)
+        self.run_wheels(-0.05, 0.0.5)
 
     def stop(self):
         self.run_wheels(0.0, 0.0)
