@@ -68,20 +68,20 @@ class Blinker(Node):
         self.run_wheels(0.5, 0.5)
 
     def turn_right(self):
-        self.run_wheels(0.3, -0.3)
+        self.run_wheels(0.1, -0.1)
 
     def turn_left(self):
-        self.run_wheels(-0.3, 0.3)
+        self.run_wheels(-0.1, 0.1)
 
     def stop(self):
         self.run_wheels(0.0, 0.0)
 
     def move(self):
-        if self.counter<=2 or (4<=self.counter and self.counter<=6):
+        if self.counter<=1 or (3<=self.counter and self.counter<=4):
             self.move_forward()
-        elif self.counter==3:
+        elif self.counter==2:
             self.turn_right()
-        elif self.counter==7:
+        elif self.counter==5:
             self.turn_left()
         else:
             self.stop()
