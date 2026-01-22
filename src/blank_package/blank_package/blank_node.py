@@ -65,13 +65,13 @@ class Blinker(Node):
         self.wheel_pub.publish(wheel_msg)
 
     def move_forward(self):
-        self.run_wheels(0.5, 0.5)
+        self.run_wheels(0.3, 0.3)
 
     def turn_right(self):
-        self.run_wheels(0.1, -0.1)
+        self.run_wheels(0.2, -0.2)
 
     def turn_left(self):
-        self.run_wheels(-0.1, 0.1)
+        self.run_wheels(-0.2, 0.2)
 
     def stop(self):
         self.run_wheels(0.0, 0.0)
