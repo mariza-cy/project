@@ -153,6 +153,8 @@ if self.counter % 30 == 0:
 self.counter += 1
 ```
 
+To copy an image from the duckie to a local directory (outside the SSH): `scp duckie@duckie05.local:/home/duckie/projectt/projectt/images/330.jpg /Users/sotir/Desktop/untitled\ folder`
+
 ---
 
 ## Troubleshooting
