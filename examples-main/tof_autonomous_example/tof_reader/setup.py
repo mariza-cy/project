@@ -10,6 +10,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('lib/'+package_name,['tof_reader/tof_node.py'])
         ('lib/'+package_name,['tof_reader/autotosdrive.py'])
     ],
     install_requires=['setuptools'],

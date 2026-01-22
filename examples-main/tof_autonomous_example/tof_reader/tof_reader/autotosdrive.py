@@ -139,7 +139,7 @@ class DriveToTarget (Node):
 
 
         if not self.odom_ready:
-            return                  #duckie duckie no move, VERY SADDDDD
+            return                  #duckie duckie no move, VERY SADDDDDD
 
             left_t, right_t = self.compute_control()
 
