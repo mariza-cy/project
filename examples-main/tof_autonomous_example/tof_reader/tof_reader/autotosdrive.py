@@ -54,7 +54,7 @@ class DriveToTarget (Node):
 
         self.timer = self.create_timer(0.1, self.control_loop)
 
-        
+
 
     def tick_callback(self, msg):
         if 'left' in msg.header.frame_id.lower():
@@ -116,8 +116,19 @@ class DriveToTarget (Node):
         # controls of duckie duckie
         forward = 0.3 if distance > 0.05 else 0.0
         turn = 2.0 * heading_error
+        left = forward - turn
+        right = forward + turn
 
-        return forward - turn, forward + turn
+        min_speed = 0.25
+
+        if abs(left) < min_speed:
+            left = math.copysign(min_speed, left)
+
+        if abs(right) < min_speed:
+            right = math.copysign(min_speed, right)
+
+        return left, right
+
 
     def control_loop(self):
 
