@@ -42,35 +42,26 @@ class DriveToTarget (Node):
         self.target_y = 0.5  # meters
 
 
-        self.left_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/tick", self.left_encoder_callback,
-    QoSProfile(depth=10))           #Sub to duckie duckie's left encoder
-
-
-        self.right_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/tick", self.right_encoder_callback,
-    QoSProfile(depth=10))           #Sub to duckie duckie's right encoder
-
+        self.encoder_sub = self.create_subscription(
+            WheelEncoderStamped,
+            f"/{self.vehicle}/tick",
+            self.tick_callback,
+            QoSProfile(depth=10)
+        )
 
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f"/{self.vehicle}/wheels_cmd", 10)     #Pub to duckie duckie's motors so he can move
 
 
         self.timer = self.create_timer(0.1, self.control_loop)
 
-
-    def left_encoder_callback(self, msg):
-        self.left_ticks = msg.data
-
-    def right_encoder_callback(self, msg):
-        self.right_ticks = msg.data
-
+        
 
     def tick_callback(self, msg):
-
-        if 'left' in msg.header.frame_id:
+        if 'left' in msg.header.frame_id.lower():
             self.left_ticks = msg.data
-            self.get_logger().info(f'Left ticks: {self.left_ticks}')
-        elif 'right' in msg.header.frame_id:
+        elif 'right' in msg.header.frame_id.lower():
             self.right_ticks = msg.data
-            self.get_logger().info(f'Right ticks: {self.right_ticks}')
+
 
 
 
@@ -123,7 +114,7 @@ class DriveToTarget (Node):
 
 
         # controls of duckie duckie
-        forward = 0.3 if distance > 0.05else 0.0
+        forward = 0.3 if distance > 0.05 else 0.0
         turn = 2.0 * heading_error
 
         return forward - turn, forward + turn
