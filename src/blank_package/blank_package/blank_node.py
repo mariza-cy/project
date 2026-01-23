@@ -58,11 +58,13 @@ class Blinker(Node):
         self.run_wheels(0.0, 0.0)
 
     def lights_white(self):
+        msg = LEDPattern()
         pattern = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)
         msg.rgb_vals = [pattern] * 5
         self.led_pub.publish(msg)
 
     def lights_red(self):
+        msg = LEDPattern()
         pattern = ColorRGBA(r=1.0, g=0.0, b=0.0, a=1.0)
         msg.rgb_vals = [pattern] * 5
         self.led_pub.publish(msg)
