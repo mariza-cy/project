@@ -57,7 +57,6 @@ class DriveToTarget (Node):
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f"/{self.vehicle}/wheels_cmd", 10)     #Pub to duckie duckie's motors so he can move
 
 
-        self.timer = self.create_timer(0.1, self.control_loop)
 
     def tick_callback(self, msg):
         # Update deltas for each wheel
