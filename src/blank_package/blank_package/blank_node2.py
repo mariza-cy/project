@@ -38,7 +38,7 @@ class Blinker(Node):
 
     #     msg.rgb_vals = [pattern] * 5
     #     self.led_pub.publish(msg)
-    
+
     # def change_color_blink(self):
     #     msg = LEDPattern()
 
@@ -49,7 +49,7 @@ class Blinker(Node):
     #     pattern4 = ColorRGBA(r=1.0, g=1.0, b=1.0, a=1.0)  # 4 -> White
     #     pattern5 = ColorRGBA(r=1.0, g=1.0, b=0.0, a=1.0)  # 5 -> Yellow
 
-    #     if self.counter2%2 == 0: 
+    #     if self.counter2%2 == 0:
     #         msg.rgb_vals = [pattern] * 5
     #     else:
     #         msg.rgb_vals = [pattern1] + [pattern2] + [pattern3] + [pattern4] + [pattern5]
@@ -65,29 +65,29 @@ class Blinker(Node):
         self.wheel_pub.publish(wheel_msg)
 
     def move_forward(self):
-        self.run_wheels(0.4, 0.3)
+        self.run_wheels(0.3, 0.2)
 
     def turn_right(self):
-        self.run_wheels(0.3, -0.3)
+        self.run_wheels(0.05, -0.05)
 
     def turn_left(self):
-        self.run_wheels(-0.2, 0.2)
+        self.run_wheels(-0.05, 0.05)
 
     def stop(self):
         self.run_wheels(0.0, 0.0)
 
     def move(self):
-        if self.counter<=1 or (3<=self.counter and self.counter<=4):
+        if self.counter <= 1 or (3 <= self.counter and self.counter <= 4):
             self.move_forward()
-        elif self.counter==2:
+        elif self.counter == 2:
             self.turn_right()
-        elif self.counter==5:
+        elif self.counter == 5:
             self.turn_left()
         else:
             self.stop()
-        
-        if self.counter<10:
-            self.counter+=1
+
+        if self.counter < 10:
+            self.counter += 1
 
     # def save_image(self, msg):
     #     if self.counter % 30 == 0:
