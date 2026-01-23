@@ -57,18 +57,42 @@ class DriveToTarget (Node):
 
         self.timer = self.create_timer(0.1, self.control_loop)
 
-
-
     def tick_callback(self, msg):
         if 'left' in msg.header.frame_id.lower():
-            self.left_ticks = msg.data
-            self.left_updated = True
+            if self.left_ticks is not None:
+                dl = msg.data - self.left_ticks  # previous left tick
+                dist_l = 2 * math.pi * self.WHEEL_RADIUS * (dl / self.TICKS_PER_REV)
+                dist_r = 0  # we don't know right wheel delta yet
+                ds = (dist_l + dist_r) / 2
+                dtheta = (dist_r - dist_l) / self.WHEEL_BASE
+                self.x += ds * math.cos(self.theta)
+                self.y += ds * math.sin(self.theta)
+                self.theta += dtheta
+            self.left_ticks = msg.data  # now update after using old value
+
         elif 'right' in msg.header.frame_id.lower():
-            self.right_ticks = msg.data
-            self.right_updated = True
+            if self.right_ticks is not None:
+                dr = msg.data - self.right_ticks  # previous right tick
+                dist_r = 2 * math.pi * self.WHEEL_RADIUS * (dr / self.TICKS_PER_REV)
+                dist_l = 0  # we don't know left wheel delta yet
+                ds = (dist_l + dist_r) / 2
+                dtheta = (dist_r - dist_l) / self.WHEEL_BASE
+                self.x += ds * math.cos(self.theta)
+                self.y += ds * math.sin(self.theta)
+                self.theta += dtheta
+            self.right_ticks = msg.data  # now update after using old value
 
 
-
+        # After updating odometry, immediately compute control
+        if self.left_ticks is not None and self.right_ticks is not None:
+            left_t, right_t = self.compute_control()
+            msg_pub = WheelsCmdStamped()
+            msg_pub.vel_left = left_t
+            msg_pub.vel_right = right_t
+            self.wheel_pub.publish(msg_pub)
+            self.get_logger().info(
+                f"CMD → left: {left_t:.2f}, right: {right_t:.2f}, x: {self.x:.2f}, y: {self.y:.2f}, theta: {self.theta:.2f}")
+            
 
     def update_odometry(self):
         if self.prev_left_ticks is None or  self.prev_right_ticks is None:
@@ -163,11 +187,13 @@ class DriveToTarget (Node):
         # Compute control
         left_t, right_t = self.compute_control()
 
-    
+
         msg = WheelsCmdStamped()
         msg.vel_left = left_t
         msg.vel_right = right_t
         self.wheel_pub.publish(msg)
+
+
 
 
 
