@@ -6,6 +6,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from sensor_msgs.msg import Range
+from rclpy.qos import QoSProfile
 from duckietown_msgs.msg import WheelsCmdStamped, WheelEncoderStamped
 
 
@@ -41,16 +42,25 @@ class DriveToTarget (Node):
         self.target_y = 0.5  # meters
 
 
-        self.left_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/left_wheel_encoder_node/tick")           #Sub to duckie duckie's left encoder
+        self.left_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/left_wheel_encoder_node/tick", self.left_encoder_callback,
+    QoSProfile(depth=10))           #Sub to duckie duckie's left encoder
 
 
-        self.right_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/right_wheel_encoder_node/tick")         #Sub to duckie duckie's right encoder
+        self.right_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/right_wheel_encoder_node/tick", self.right_encoder_callback,
+    QoSProfile(depth=10))           #Sub to duckie duckie's right encoder
 
 
         self.wheel_pub = self.create_publisher(WheelsCmdStamped, f"/{self.vehicle}/wheels_driver_node/wheels_cmd", self.tick, 10)     #Pub to duckie duckie's motors so he can move
 
 
         self.timer = self.create_timer(0.1, self.control_loop)
+
+
+    def left_encoder_callback(self, msg):
+        self.get_logger().info(f"Left ticks: {msg.data}")
+
+    def right_encoder_callback(self, msg):
+            self.get_logger().info(f"Right ticks: {msg.data}")
 
 
 
@@ -133,20 +143,19 @@ class DriveToTarget (Node):
             self.odom_ready = True                                 #to make sure duckie duckie starts at the right time
             return
 
-            self.update_odometry()
+        self.update_odometry()
 
 
         if not self.odom_ready:
             return                  #duckie duckie no move, VERY SADDDDDD
 
-            left_t, right_t = self.compute_control()
+        left_t, right_t = self.compute_control()
 
-            msg = WheelsCmdStamped()
-            msg.vel_left = left_t         #duckie's motors get power
-            msg.vel_right = right_t       #duckie's motors get power
-            self.cmd_pub.publish(msg)
+        msg = WheelsCmdStamped()
+        msg.vel_left = left_t         #duckie's motors get power
+        msg.vel_right = right_t       #duckie's motors get power
+        self.cmd_pub.publish(msg)
 
-            rate.sleep()
 
 
 if __name__ == '__main__':
