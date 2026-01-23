@@ -62,6 +62,9 @@ class DriveToTarget (Node):
     def right_encoder_callback(self, msg):
             self.get_logger().info(f"Right ticks: {msg.data}") #dataaaaaa
 
+    def tick(self, msg):
+        self.left_ticks = msg.data    
+
 
 
 
