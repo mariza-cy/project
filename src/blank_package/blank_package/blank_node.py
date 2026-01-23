@@ -97,7 +97,7 @@ class Blinker(Node):
         if dist <= 0.01:
             self.get_logger().info('Obstacle very close, stopping')
             self.stop()
-        if dist <= 0.2:
+        elif dist <= 0.2:
             self.get_logger().info('Obstacle detected')
             # self.save_image = True
             self.lights_red()
