@@ -141,43 +141,33 @@ class DriveToTarget (Node):
         self.y += ds * math.sin(self.theta)
         self.theta += dtheta
 
-
-
     def compute_control(self):
-
         # Error vector for duckie duckie
         lx = self.target_x - self.x
         ly = self.target_y - self.y
-
 
         distance = math.sqrt(lx ** 2 + ly ** 2)
         desired_theta = math.atan2(ly, lx)
         heading_error = desired_theta - self.theta
 
+        # Normalize angle
+        heading_error = math.atan2(math.sin(heading_error), math.cos(heading_error))
 
-        # crazy angle math for duckie duckie
-        heading_error = math.atan2(
-            math.sin(heading_error),
-            math.cos(heading_error)
-        )
-
-
-        # controls of duckie duckie
+        # Controls of duckie duckie
         forward = 0.3 if distance > 0.05 else 0.0
         turn = 2.0 * heading_error
+
         left = forward - turn
-        right = forward + turn
+        right = -(forward + turn)  # INVERT THIS MOTOR
 
+        # Minimum speed to overcome static friction
         min_speed = 0.25
-
         if abs(left) < min_speed:
             left = math.copysign(min_speed, left)
-
         if abs(right) < min_speed:
             right = math.copysign(min_speed, right)
 
         return left, right
-
 
 
 if __name__ == '__main__':
@@ -188,4 +178,4 @@ if __name__ == '__main__':
    node.destroy_node()
    rclpy.shutdown()
 
-   #CRASH OUT COUNT: 7
+   #CRASH OUT COUNT: 8
