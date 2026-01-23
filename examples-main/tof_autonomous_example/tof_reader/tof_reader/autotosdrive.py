@@ -38,6 +38,9 @@ class DriveToTarget (Node):
         self.left_ticks = None
         self.right_ticks = None
 
+        self.left_updated = False
+        self.right_updated = False
+
         self.target_x = 1.0  # meters
         self.target_y = 0.5  # meters
 
@@ -59,8 +62,10 @@ class DriveToTarget (Node):
     def tick_callback(self, msg):
         if 'left' in msg.header.frame_id.lower():
             self.left_ticks = msg.data
+            self.left_updated = True
         elif 'right' in msg.header.frame_id.lower():
             self.right_ticks = msg.data
+            self.right_updated = True
 
 
 
@@ -133,27 +138,36 @@ class DriveToTarget (Node):
     def control_loop(self):
 
         if self.left_ticks is None or self.right_ticks is None:
-            return
+          return
 
+        if not (self.left_updated and self.right_updated):
+          return
+
+        # Reset updates of duckie duckie
+        self.left_updated = False
+        self.right_updated = False
+
+    # init odometry of duckie dcukieeeeeeeeeeee
         if self.prev_left_ticks is None or self.prev_right_ticks is None:
-            self.prev_left_ticks = self.left_ticks
-            self.prev_right_ticks = self.right_ticks
-            self.odom_ready = True                                 #to make sure duckie duckie starts at the right time
-            return
+           self.prev_left_ticks = self.left_ticks
+           self.prev_right_ticks = self.right_ticks
+           self.odom_ready = True
+           return
+
 
         self.update_odometry()
 
-
         if not self.odom_ready:
-            return                  #duckie duckie no move, VERY SADDDDDD
+           return
 
+        # Compute control
         left_t, right_t = self.compute_control()
 
+    
         msg = WheelsCmdStamped()
-        msg.vel_left = left_t         #duckie's motors get power
-        msg.vel_right = right_t       #duckie's motors get power
+        msg.vel_left = left_t
+        msg.vel_right = right_t
         self.wheel_pub.publish(msg)
-
 
 
 
@@ -166,4 +180,4 @@ if __name__ == '__main__':
    node.destroy_node()
    rclpy.shutdown()
 
-   #CRASH OUT COUNT: 5
+   #CRASH OUT COUNT: 7
