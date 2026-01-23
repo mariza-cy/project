@@ -6,6 +6,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from sensor_msgs.msg import Range
+from rclpy.qos import QoSProfile
 from duckietown_msgs.msg import WheelsCmdStamped, WheelEncoderStamped
 
 
@@ -30,6 +31,8 @@ class DriveToTarget (Node):
         self.y = 0.0
         self.theta = 0.0
 
+        self.left_delta = 0
+        self.right_delta = 0
 
         self.prev_left_ticks = None
         self.prev_right_ticks = None
@@ -37,33 +40,78 @@ class DriveToTarget (Node):
         self.left_ticks = None
         self.right_ticks = None
 
+        self.left_updated = False
+        self.right_updated = False
+
         self.target_x = 1.0  # meters
         self.target_y = 0.5  # meters
 
 
-        self.left_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/left_wheel_encoder_node/tick")           #Sub to duckie duckie's left encoder
+        self.encoder_sub = self.create_subscription(
+            WheelEncoderStamped,
+            f"/{self.vehicle}/tick",
+            self.tick_callback,
+            QoSProfile(depth=10)
+        )
 
-
-        self.right_t = self.create_subscription(WheelEncoderStamped, f"/{self.vehicle}/right_wheel_encoder_node/tick")         #Sub to duckie duckie's right encoder
-
-
-        self.wheel_pub = self.create_publisher(WheelsCmdStamped, f"/{self.vehicle}/wheels_driver_node/wheels_cmd", self.tick, 10)     #Pub to duckie duckie's motors so he can move
-
-
-        self.timer = self.create_timer(0.1, self.control_loop)
-
+        self.wheel_pub = self.create_publisher(WheelsCmdStamped, f"/{self.vehicle}/wheels_cmd", 10)     #Pub to duckie duckie's motors so he can move
 
 
 
     def tick_callback(self, msg):
-
-        if 'left' in msg.header.frame_id:
+        # Update deltas for each wheel
+        if 'left' in msg.header.frame_id.lower():
+            if self.left_ticks is not None:
+                dl = msg.data - self.left_ticks
+                self.left_delta += dl
             self.left_ticks = msg.data
-            self.get_logger().info(f'Left ticks: {self.left_ticks}')
-        elif 'right' in msg.header.frame_id:
-            self.right_ticks = msg.data
-            self.get_logger().info(f'Right ticks: {self.right_ticks}')
 
+        elif 'right' in msg.header.frame_id.lower():
+            if self.right_ticks is not None:
+                dr = msg.data - self.right_ticks
+                self.right_delta += dr
+            self.right_ticks = msg.data
+
+        # Only update odometry and publish if both wheels have moved at least 1 tick
+        if self.left_delta != 0 and self.right_delta != 0:
+            # Compute distances
+            dist_l = 2 * math.pi * self.WHEEL_RADIUS * (self.left_delta / self.TICKS_PER_REV)
+            dist_r = 2 * math.pi * self.WHEEL_RADIUS * (self.right_delta / self.TICKS_PER_REV)
+
+            # Update robot pose
+            ds = (dist_l + dist_r) / 2
+            dtheta = (dist_r - dist_l) / self.WHEEL_BASE
+
+            self.x += ds * math.cos(self.theta)
+            self.y += ds * math.sin(self.theta)
+            self.theta += dtheta
+
+            # Reset deltas
+            self.left_delta = 0
+            self.right_delta = 0
+
+            # Compute wheel commands
+            left_t, right_t = self.compute_control()
+
+            # Publish motor commands
+            msg_pub = WheelsCmdStamped()
+            msg_pub.vel_left = left_t
+            msg_pub.vel_right = right_t
+            self.wheel_pub.publish(msg_pub)
+
+            self.get_logger().info(
+                f"CMD → left: {left_t:.2f}, right: {right_t:.2f}, x: {self.x:.2f}, y: {self.y:.2f}, theta: {self.theta:.2f}"
+            )
+
+        # After updating odometry, immediately compute control
+        if self.left_ticks is not None and self.right_ticks is not None:
+            left_t, right_t = self.compute_control()
+            msg_pub = WheelsCmdStamped()
+            msg_pub.vel_left = left_t
+            msg_pub.vel_right = right_t
+            self.wheel_pub.publish(msg_pub)
+            self.get_logger().info(
+                f"CMD → left: {left_t:.2f}, right: {right_t:.2f}, x: {self.x:.2f}, y: {self.y:.2f}, theta: {self.theta:.2f}")
 
 
     def update_odometry(self):
@@ -93,60 +141,33 @@ class DriveToTarget (Node):
         self.y += ds * math.sin(self.theta)
         self.theta += dtheta
 
-
-
     def compute_control(self):
-
         # Error vector for duckie duckie
         lx = self.target_x - self.x
         ly = self.target_y - self.y
-
 
         distance = math.sqrt(lx ** 2 + ly ** 2)
         desired_theta = math.atan2(ly, lx)
         heading_error = desired_theta - self.theta
 
+        # Normalize angle
+        heading_error = math.atan2(math.sin(heading_error), math.cos(heading_error))
 
-        # crazy angle math for duckie duckie
-        heading_error = math.atan2(
-            math.sin(heading_error),
-            math.cos(heading_error)
-        )
-
-
-        # controls of duckie duckie
+        # Controls of duckie duckie
         forward = 0.3 if distance > 0.05 else 0.0
         turn = 2.0 * heading_error
 
+        left = forward - turn
+        right = -(forward + turn)  # INVERT THIS MOTOR
 
-        return forward - turn, forward + turn
+        # Minimum speed to overcome static friction
+        min_speed = 0.25
+        if abs(left) < min_speed:
+            left = math.copysign(min_speed, left)
+        if abs(right) < min_speed:
+            right = math.copysign(min_speed, right)
 
-
-    def control_loop(self):
-
-        if self.left_ticks is None or self.right_ticks is None:
-            return
-
-        if self.prev_left_ticks is None or self.prev_right_ticks is None:
-            self.prev_left_ticks = self.left_ticks
-            self.prev_right_ticks = self.right_ticks
-            self.odom_ready = True                                 #to make sure duckie duckie starts at the right time
-            return
-
-            self.update_odometry()
-
-
-        if not self.odom_ready:
-            return                  #duckie duckie no move, VERY SADDDDDD
-
-            left_t, right_t = self.compute_control()
-
-            msg = WheelsCmdStamped()
-            msg.vel_left = left_t         #duckie's motors get power
-            msg.vel_right = right_t       #duckie's motors get power
-            self.cmd_pub.publish(msg)
-
-            rate.sleep()
+        return left, right
 
 
 if __name__ == '__main__':
@@ -157,5 +178,4 @@ if __name__ == '__main__':
    node.destroy_node()
    rclpy.shutdown()
 
-   #CRASH OUT COUNT: 5
-
+   #CRASH OUT COUNT: 8
