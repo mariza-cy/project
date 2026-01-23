@@ -32,7 +32,7 @@ class Blinker(Node):
         if self.take_image and not same_obstacle:
             self.get_logger().info(f'Obstacle detected - Saving image #{self.image_counter}')
             self.image_counter += 1
-            with open(self.output_dir + str(self.image_counter) + '.jpg', 'wb') as f:
+            with open(self.output_dir + 'Obstacle ' + str(self.image_counter) + '.jpg', 'wb') as f:
                 f.write(msg.data)
 
             self.take_image = False
@@ -99,7 +99,7 @@ class Blinker(Node):
             self.stop()
         elif dist <= 0.2:
             # self.get_logger().info('Obstacle detected')
-            self.save_image = True
+            self.take_image = True
             self.lights_red()
             self.turn_right()
         else:
